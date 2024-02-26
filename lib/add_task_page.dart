@@ -46,7 +46,7 @@ class _AddTaskPageState extends State<AddTaskPage> {
                     width: double.infinity,
                     child: TextButton(
                       onPressed: () {
-                        Navigator.of(context).pop();
+                        Navigator.of(context).pop(_text);
                       },
                       child: const Text('キャンセル'),
                     ))

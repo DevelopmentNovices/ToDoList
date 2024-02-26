@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:todolist/add_task_page.dart';
+import 'package:todolist/database/tasks.dart';
 
 class ToDoListPage extends StatefulWidget {
   const ToDoListPage({Key? key}) : super(key: key);
@@ -8,36 +9,41 @@ class ToDoListPage extends StatefulWidget {
 }
 
 class _ToDoListPageState extends State<ToDoListPage> {
-  List<String> todoList = [];
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('リスト一覧'),
       ),
-      body: ListView.builder(
-        itemCount: todoList.length,
-        itemBuilder: (context, index){
-          return Card(
-            child: ListTile(
-              title: Text(todoList[index]),
-            ),
-          );
-        },
-      ),
+      body: FutureBuilder(
+          future: TasksHelper.queryAll(),
+          builder: (BuildContext context, AsyncSnapshot<List<Task>> snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const CircularProgressIndicator();
+            } else if (snapshot.hasError) {
+              return Text('Error: ${snapshot.error}');
+            } else if (snapshot.hasData) {
+              return ListView.builder(
+                itemCount: snapshot.data!.length,
+                itemBuilder: (BuildContext context, int index) {
+                  return Card(
+                      child:
+                          ListTile(title: Text(snapshot.data![index].title)));
+                },
+              );
+            } else {
+              return const Text('Awaiting result...');
+            }
+          }),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
-          final newListText = await Navigator.of(context).push(
+          final String newTaskText = await Navigator.of(context).push(
             MaterialPageRoute(builder: (context) {
-              return const AddTaskPage();
-            }),
-          );
-          if (newListText != null) {
-            setState(() {
-              todoList.add(newListText);
-            });
-          }
+            return const AddTaskPage();
+          }));
+          setState(() {
+            TasksHelper.insert(Task(title: newTaskText));
+          });
         },
         child: const Icon(Icons.add),
       ),
