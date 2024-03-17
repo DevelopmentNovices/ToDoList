@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:todolist/add_task_page.dart';
+import 'package:todolist/edit_label_page.dart';
 import 'package:todolist/database/tasks.dart';
 
 class ToDoListPage extends StatefulWidget {
@@ -14,6 +15,19 @@ class _ToDoListPageState extends State<ToDoListPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('リスト一覧'),
+      ),
+      drawer: Drawer(
+        child: ListView(children: [
+          const DrawerHeader(child: Text('ToDoListApp')),
+          ListTile(
+              title: const Text('ラベル管理'),
+              onTap: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: ((context) => const EditLabelPage())));
+              }),
+        ]),
       ),
       body: FutureBuilder(
           future: TasksHelper.queryAll(),
@@ -37,13 +51,10 @@ class _ToDoListPageState extends State<ToDoListPage> {
           }),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
-          final String newTaskText = await Navigator.of(context).push(
-            MaterialPageRoute(builder: (context) {
+          await Navigator.of(context).push(MaterialPageRoute(builder: (context) {
             return const AddTaskPage();
           }));
-          setState(() {
-            TasksHelper.insert(Task(title: newTaskText));
-          });
+          setState(() {});
         },
         child: const Icon(Icons.add),
       ),
